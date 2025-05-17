@@ -26,7 +26,10 @@
 </div>
 
 <!--<button onclick="showInputs()">Show Inputs</button>-->
-<button onclick="calcCapital()">Vermögen Kalkulieren</button>
+<div>
+    <button onclick="calcCapital()">Vermögen Kalkulieren</button>
+    <span id="vermoegen"></span>
+</div>
 
 <canvas id="myChart" style="width: 90vw; height: 60vh"></canvas>
 
@@ -98,8 +101,12 @@
         myChart.data.datasets[0].data = data;
         myChart.update();
 
-
-        alert(`Endkapital: ${(kapital + zwischenkapital).toFixed(2)}`);
+        const end_kapital = kapital + zwischenkapital;
+        if (!isNaN(end_kapital)) {
+            document.getElementById('vermoegen').innerHTML = `Endkapital: ${(end_kapital).toFixed(2)}`;
+        } else {
+            document.getElementById('vermoegen').innerHTML = 'Fehler';
+        }
     }
 </script>
 
