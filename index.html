@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Staffelzins</title>
+</head>
+<body>
+<div>
+    <label for="startkapital">Startkapital:</label>
+    <input type="number" id="startkapital" name="startkapital"/>
+</div>
+
+<div>
+    <label for="tage">Tage:</label>
+    <input type="number" id="tage" name="tage"/>
+</div>
+
+<div>
+    <label for="zins">Zins in Prozent:</label>
+    <input type="number" id="zins" name="zins"/>
+</div>
+
+<div>
+    <label for="aktie_preis">Preis Aktie:</label>
+    <input type="number" id="aktie_preis" name="aktie_preis"/>
+</div>
+
+<!--<button onclick="showInputs()">Show Inputs</button>-->
+<button onclick="calcCapital()">Vermögen Kalkulieren</button>
+
+<canvas id="myChart" style="width: 90vw; height: 60vh"></canvas>
+
+
+</body>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const ctx = document.getElementById('myChart');
+    const myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Vermögensentwicklung',
+                data: [],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: false
+                }
+            }
+        }
+    });
+
+    function showInputs() {
+        const startkapital = document.getElementById('startkapital').value;
+        const tage = document.getElementById('tage').value;
+        const zins = document.getElementById('zins').value;
+        const aktie_preis = document.getElementById('aktie_preis').value;
+
+        alert(JSON.stringify({
+            startkapital,
+            tage,
+            zins,
+            aktie_preis,
+        }));
+    }
+    const labels = [0];
+    const data = [];
+
+    function calcCapital() {
+        let kapital = parseFloat(document.getElementById('startkapital').value);
+        data.push(kapital);
+        const tage = parseInt(document.getElementById('tage').value);
+        const zins = parseFloat(document.getElementById('zins').value);
+        const aktie_preis = parseFloat(document.getElementById('aktie_preis').value);
+
+        let zwischenkapital = 0;
+        for (let i = 0; i < tage; ++i) {
+            labels.push(i + 1);
+            const profit_tag = kapital * zins / 100;
+            zwischenkapital += profit_tag;
+            const kaufbare_aktien = Math.floor(zwischenkapital / aktie_preis);
+            if (kaufbare_aktien > 0) {
+                kapital += kaufbare_aktien * aktie_preis;
+                zwischenkapital -= kaufbare_aktien * aktie_preis;
+            }
+            data.push(kapital);
+        }
+
+        myChart.data.labels = labels;
+        myChart.data.datasets[0].data = data;
+        myChart.update();
+
+
+        alert(`Endkapital: ${(kapital + zwischenkapital).toFixed(2)}`);
+    }
+</script>
+
+<style>
+    div {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        max-width: 400px;
+    }
+
+    label {
+        flex: 1;
+    }
+
+    input {
+        flex: 1;
+        text-align: right; /* Optional: text inside the input is right-aligned */
+    }
+</style>
+</html>
