@@ -7,22 +7,22 @@
 <body>
 <div>
     <label for="startkapital">Startkapital:</label>
-    <input type="number" id="startkapital" name="startkapital"/>
+    <input type="number" id="startkapital" name="startkapital" oninput="calcCapital()"/>
 </div>
 
 <div>
     <label for="tage">Tage:</label>
-    <input type="number" id="tage" name="tage"/>
+    <input type="number" id="tage" name="tage" oninput="calcCapital()"/>
 </div>
 
 <div>
     <label for="zins">Zins in Prozent:</label>
-    <input type="number" id="zins" name="zins"/>
+    <input type="number" id="zins" name="zins" oninput="calcCapital()"/>
 </div>
 
 <div>
     <label for="aktie_preis">Preis Aktie:</label>
-    <input type="number" id="aktie_preis" name="aktie_preis"/>
+    <input type="number" id="aktie_preis" name="aktie_preis" oninput="calcCapital()"/>
 </div>
 
 <!--<button onclick="showInputs()">Show Inputs</button>-->
@@ -76,6 +76,7 @@
     const data = [];
 
     function calcCapital() {
+        console.log('recalculation');
         labels.length = 0;
         data.length = 0;
         let kapital = parseFloat(document.getElementById('startkapital').value);
