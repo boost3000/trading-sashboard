@@ -73,6 +73,8 @@
     const data = [];
 
     function calcCapital() {
+        labels.length = 0;
+        data.length = 0;
         let kapital = parseFloat(document.getElementById('startkapital').value);
         data.push(kapital);
         const tage = parseInt(document.getElementById('tage').value);
