@@ -5,34 +5,34 @@
     <title>Staffelzins</title>
 </head>
 <body>
+<div><h1>Zinsrechnung</h1></div>
 <div>
     <label for="startkapital">Startkapital:</label>
-    <input type="number" id="startkapital" name="startkapital" oninput="calcCapital()"/>
+    <input type="number" id="startkapital" name="startkapital" oninput="calcCapital()" value="1000"/>
 </div>
 
 <div>
     <label for="tage">Tage:</label>
-    <input type="number" id="tage" name="tage" oninput="calcCapital()"/>
+    <input type="number" id="tage" name="tage" oninput="calcCapital()" value="200"/>
 </div>
 
 <div>
     <label for="zins">Zins in Prozent:</label>
-    <input type="number" id="zins" name="zins" oninput="calcCapital()"/>
+    <input type="number" id="zins" name="zins" oninput="calcCapital()" value="1"/>
 </div>
 
 <div>
     <label for="aktie_preis">Preis Aktie:</label>
-    <input type="number" id="aktie_preis" name="aktie_preis" oninput="calcCapital()"/>
+    <input type="number" id="aktie_preis" name="aktie_preis" oninput="calcCapital()" value="25"/>
 </div>
 
-<!--<button onclick="showInputs()">Show Inputs</button>-->
 <div>
     <button onclick="calcCapital()">Vermögen Kalkulieren</button>
     <span id="vermoegen"></span>
 </div>
 
 <canvas id="myChart" style="width: 90vw; height: 60vh"></canvas>
-
+<hr>
 
 </body>
 
@@ -44,71 +44,75 @@
         type: 'line',
         data: {
             labels: [],
-            datasets: [{
-                label: 'Vermögensentwicklung',
-                data: [],
-                borderWidth: 1
-            }]
+            datasets: [
+                {label: 'Vermögensentwicklung (Gestückelt)', data: [], borderWidth: 1},
+                {label: 'Vermögensentwicklung (Normal)', data: [], borderWidth: 1},
+            ],
         },
         options: {
             scales: {
                 y: {
                     beginAtZero: false
                 }
-            }
+            },
+            interaction: {
+                intersect: true,
+                mode: 'index',
+            },
         }
     });
 
-    function showInputs() {
-        const startkapital = document.getElementById('startkapital').value;
-        const tage = document.getElementById('tage').value;
-        const zins = document.getElementById('zins').value;
-        const aktie_preis = document.getElementById('aktie_preis').value;
-
-        alert(JSON.stringify({
-            startkapital,
-            tage,
-            zins,
-            aktie_preis,
-        }));
-    }
     const labels = [0];
-    const data = [];
+    const data_staffel = [];
+    const data_normal = [];
 
     function calcCapital() {
         console.log('recalculation');
         labels.length = 0;
-        data.length = 0;
+        data_staffel.length = 0;
+        data_normal.length = 0;
         let kapital = parseFloat(document.getElementById('startkapital').value);
-        data.push(kapital);
+        data_staffel.push(kapital);
+        data_normal.push(kapital);
         const tage = parseInt(document.getElementById('tage').value);
         const zins = parseFloat(document.getElementById('zins').value);
         const aktie_preis = parseFloat(document.getElementById('aktie_preis').value);
 
+        let kapital_staffel = kapital;
+        let kapital_normal = kapital;
         let zwischenkapital = 0;
         for (let i = 0; i < tage; ++i) {
+            //staffel
             labels.push(i + 1);
-            const profit_tag = kapital * zins / 100;
+            const profit_tag = kapital_staffel * zins / 100;
             zwischenkapital += profit_tag;
             const kaufbare_aktien = Math.floor(zwischenkapital / aktie_preis);
             if (kaufbare_aktien > 0) {
-                kapital += kaufbare_aktien * aktie_preis;
+                kapital_staffel += kaufbare_aktien * aktie_preis;
                 zwischenkapital -= kaufbare_aktien * aktie_preis;
             }
-            data.push(kapital);
+            data_staffel.push(kapital_staffel);
+
+            //normal
+            kapital_normal *= 1 + zins / 100;
+            data_normal.push(kapital_normal);
         }
 
         myChart.data.labels = labels;
-        myChart.data.datasets[0].data = data;
+        myChart.data.datasets[0].data = data_staffel;
+        myChart.data.datasets[1].data = data_normal;
         myChart.update();
 
-        const end_kapital = kapital + zwischenkapital;
+        const end_kapital = kapital_staffel + zwischenkapital;
         if (!isNaN(end_kapital)) {
             document.getElementById('vermoegen').innerHTML = `Endkapital: ${(end_kapital).toFixed(2)}`;
         } else {
             document.getElementById('vermoegen').innerHTML = 'Fehler';
         }
     }
+
+
+    calcCapital();
 </script>
 
 <style>
