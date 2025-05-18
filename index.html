@@ -32,7 +32,12 @@
 </div>
 
 <canvas id="myChart" style="width: 90vw; height: 60vh"></canvas>
+
 <hr>
+
+<div><h1>Tagebuch</h1></div>
+<div id="diary"></div>
+
 
 </body>
 
@@ -111,6 +116,29 @@
         }
     }
 
+    (async () => {
+        const response = await fetch('https://raw.githubusercontent.com/boost3000/trading-sashboard/master/diary.csv');
+        const data = await response.text();
+        console.log({data});
+        let html = '<table>';
+        for (const [i, row] of data.split('\n').filter(row => row).entries()) {
+            let row_html = '<tr>';
+            for (const col of row.split(',')) {
+                if (i === 0) {
+                    row_html += `<th>${col}</th>`;
+                } else {
+                    row_html += `<td>${col}</td>`;
+                }
+            }
+            row_html += '</tr>';
+            html += row_html;
+        }
+
+        html += '</table>';
+        const table = document.getElementById('diary');
+        table.innerHTML = html;
+    })();
+
 
     calcCapital();
 </script>
@@ -130,6 +158,16 @@
     input {
         flex: 1;
         text-align: right; /* Optional: text inside the input is right-aligned */
+    }
+
+    table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+    td, th {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
     }
 </style>
 </html>
