@@ -5,6 +5,28 @@
     <title>Staffelzins</title>
 </head>
 <body>
+
+<div><h1>Prozentrechner</h1></div>
+<div>
+    <label for="startwert">Startwert:</label>
+    <input type="number" id="startwert" name="startwert" value="0"/>
+    <button onclick="calcStartwert()">Berechnen</button>
+</div>
+
+<div>
+    <label for="prozentwert">Prozent:</label>
+    <input type="number" id="prozentwert" name="prozentwert" value="0"/>
+    <button onclick="calcProzentwert()">Berechnen</button>
+</div>
+
+<div>
+    <label for="endwert">Endwert:</label>
+    <input type="number" id="endwert" name="endwert" value="0"/>
+    <button onclick="calcEndwert()">Berechnen</button>
+</div>
+
+<hr>
+
 <div><h1>Zinsrechnung</h1></div>
 <div>
     <label for="startkapital">Startkapital:</label>
@@ -44,14 +66,34 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
+    function calcStartwert() {
+        const prozentwert = parseFloat(document.getElementById('prozentwert').value);
+        const endwert = parseFloat(document.getElementById('endwert').value);
+        document.getElementById('startwert').value = (endwert / (1 + prozentwert / 100)).toFixed(2);
+    }
+
+    function calcProzentwert() {
+        const startwert = parseFloat(document.getElementById('startwert').value);
+        const endwert = parseFloat(document.getElementById('endwert').value);
+        document.getElementById('prozentwert').value = ((endwert / startwert - 1) * 100).toFixed(2);
+    }
+
+    function calcEndwert() {
+        const startwert = parseFloat(document.getElementById('startwert').value);
+        const prozentwert = parseFloat(document.getElementById('prozentwert').value);
+        document.getElementById('endwert').value = (startwert * (1 + prozentwert / 100)).toFixed(2);
+    }
+
     const ctx = document.getElementById('myChart');
     const myChart = new Chart(ctx, {
         type: 'line',
         data: {
             labels: [],
             datasets: [
-                {label: 'Vermögensentwicklung (Gestückelt)', data: [], borderWidth: 1},
-                {label: 'Vermögensentwicklung (Normal)', data: [], borderWidth: 1},
+                {label: 'Vermögensentwicklung (Normal und ohne Steuer)', data: [], borderWidth: 1},
+                {label: 'Vermögensentwicklung (Gestückelt und ohne Steuer)', data: [], borderWidth: 1},
+                // {label: 'Vermögensentwicklung (Gestückelt und Steuer sofort)', data: [], borderWidth: 1},
+                // {label: 'Vermögensentwicklung (Gestückelt und Steuer pro Jahr)', data: [], borderWidth: 1},
             ],
         },
         options: {
@@ -66,16 +108,24 @@
             },
         }
     });
+    const tage_pro_jahr = 250;
+    const steuer = 25 * 1.05;
+    // const steuer = 25;
 
     const labels = [0];
-    const data_staffel = [];
+
     const data_normal = [];
+    const data_staffel = [];
+    const data_staffel_steuer_sofort = [];
+    const data_staffel_steuer_pro_jahr = [];
 
     function calcCapital() {
         console.log('recalculation');
         labels.length = 0;
         data_staffel.length = 0;
         data_normal.length = 0;
+        data_staffel_steuer_sofort.length = 0;
+        data_staffel_steuer_pro_jahr.length = 0;
         let kapital = parseFloat(document.getElementById('startkapital').value);
         data_staffel.push(kapital);
         data_normal.push(kapital);
@@ -83,12 +133,22 @@
         const zins = parseFloat(document.getElementById('zins').value);
         const aktie_preis = parseFloat(document.getElementById('aktie_preis').value);
 
-        let kapital_staffel = kapital;
         let kapital_normal = kapital;
+        let kapital_staffel = kapital;
+        let kapital_staffel_steuer_sofort = kapital;
+        let kapital_staffel_steuer_pro_jahr = kapital;
         let zwischenkapital = 0;
+        let zwischenkapital_steuer_sofort = 0;
+        let zwischenkapital_steuer_pro_jahr = 0;
         for (let i = 0; i < tage; ++i) {
-            //staffel
             labels.push(i + 1);
+
+            //ohne staffel, ohne steuer
+            kapital_normal *= 1 + zins / 100;
+            data_normal.push(kapital_normal);
+
+
+            //staffel ohne steuern
             const profit_tag = kapital_staffel * zins / 100;
             zwischenkapital += profit_tag;
             const kaufbare_aktien = Math.floor(zwischenkapital / aktie_preis);
@@ -96,16 +156,44 @@
                 kapital_staffel += kaufbare_aktien * aktie_preis;
                 zwischenkapital -= kaufbare_aktien * aktie_preis;
             }
-            data_staffel.push(kapital_staffel);
 
-            //normal
-            kapital_normal *= 1 + zins / 100;
-            data_normal.push(kapital_normal);
+            //staffel steuer sofort
+            const profit_tag_steuer_sofort = profit_tag * (1 - steuer / 100);
+            console.log(profit_tag, profit_tag_steuer_sofort);
+            zwischenkapital_steuer_sofort += profit_tag_steuer_sofort;
+            const kaufbare_aktien_steuer_sofort = Math.floor(zwischenkapital_steuer_sofort / aktie_preis);
+            if (kaufbare_aktien_steuer_sofort > 0) {
+                kapital_staffel_steuer_sofort += kaufbare_aktien_steuer_sofort * aktie_preis;
+                zwischenkapital_steuer_sofort -= kaufbare_aktien_steuer_sofort * aktie_preis;
+            }
+
+            //staffel steuer pro jahr
+            const profit_tag_steuer_pro_jahr = profit_tag;
+            zwischenkapital_steuer_pro_jahr += profit_tag_steuer_pro_jahr;
+            const kaufbare_aktien_steuer_pro_jahr = Math.floor(zwischenkapital_steuer_pro_jahr / aktie_preis);
+            if (kaufbare_aktien_steuer_pro_jahr > 0) {
+                kapital_staffel_steuer_pro_jahr += kaufbare_aktien_steuer_pro_jahr * aktie_preis;
+                zwischenkapital_steuer_pro_jahr -= kaufbare_aktien_steuer_pro_jahr * aktie_preis;
+            }
+            if ((i + 1) % tage_pro_jahr === 0) {
+                const jahresgewinn = kapital_staffel_steuer_pro_jahr - data_staffel_steuer_pro_jahr[data_staffel_steuer_pro_jahr.length - tage_pro_jahr + 1];
+                const jahressteuer = jahresgewinn  * steuer / 100;
+                kapital_staffel_steuer_pro_jahr -= jahressteuer;
+                // console.log({i, jahresgewinn, jahressteuer});
+            }
+
+            data_staffel.push(kapital_staffel);
+            data_staffel_steuer_sofort.push(kapital_staffel_steuer_sofort);
+            data_staffel_steuer_pro_jahr.push(kapital_staffel_steuer_pro_jahr);
         }
 
         myChart.data.labels = labels;
-        myChart.data.datasets[0].data = data_staffel;
-        myChart.data.datasets[1].data = data_normal;
+        myChart.data.datasets[0].data = data_normal;
+        myChart.data.datasets[1].data = data_staffel;
+        // myChart.data.datasets[2].data = data_staffel_steuer_sofort;
+        // myChart.data.datasets[3].data = data_staffel_steuer_pro_jahr;
+
+        console.log()
         myChart.update();
 
         const end_kapital = kapital_staffel + zwischenkapital;
