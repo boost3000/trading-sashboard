@@ -10,19 +10,19 @@
 <div>
     <label for="startwert">Startwert:</label>
     <input type="number" id="startwert" name="startwert"/>
-    <button onclick="calcStartwert()">Berechnen</button>
+    <button onclick="calcStartwert()" style="margin-left: 12px">Berechnen</button>
 </div>
 
 <div>
     <label for="prozentwert">Prozent:</label>
     <input type="number" id="prozentwert" name="prozentwert"/>
-    <button onclick="calcProzentwert()">Berechnen</button>
+    <button onclick="calcProzentwert()" style="margin-left: 12px">Berechnen</button>
 </div>
 
 <div>
     <label for="endwert">Endwert:</label>
     <input type="number" id="endwert" name="endwert"/>
-    <button onclick="calcEndwert()">Berechnen</button>
+    <button onclick="calcEndwert()" style="margin-left: 12px">Berechnen</button>
 </div>
 
 <hr>
@@ -259,6 +259,18 @@
         border: 1px solid #dddddd;
         text-align: left;
         padding: 8px;
+    }
+
+    /* Chrome, Safari, Edge, Opera */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    /* Firefox */
+    input[type=number] {
+        -moz-appearance: textfield;
     }
 </style>
 </html>
